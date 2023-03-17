@@ -1,0 +1,12 @@
+insert into gm_zamowienia_poz_data_zamk c
+  (pozycje_id, data_zamkniecia, zamkniete)
+  select x.record_id, x.jn_datetime, x.new_value
+    from global_dml_audit x
+   where x.table_name = 'GM_ZAMOWIENIA_POZYCJE'
+     and x.column_name = 'ZAMKNIETE'
+     and x.new_value is not null
+     and not exists (select 1
+            from gm_zamowienia_poz_data_zamk w
+           where w.data_zamkniecia = x.jn_datetime
+             and w.pozycje_id = x.record_id
+             and w.zamkniete = x.new_value)
