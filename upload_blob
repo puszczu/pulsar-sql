@@ -1,0 +1,56 @@
+create or replace function upload_blob5(v_blob blob) return varchar2 is
+  v_req           utl_http.req;
+  v_resp          utl_http.resp;
+  v_parts         utl_http_multipart.parts := utl_http_multipart.parts();
+
+  l_chunk_vc      varchar2(2000);
+  l_response_text clob;
+begin
+
+  utl_http_multipart.add_file(v_parts, 'file', 'file.bin', 'application/octet-stream', v_blob);
+
+  v_req := utl_http.begin_request('http://localhost:6667/Upload', 'POST', 'HTTP/1.1');
+  utl_http_multipart.send(v_req, v_parts);
+
+  v_resp := utl_http.get_response(v_req);
+  if (v_resp.status_code <> utl_http.http_ok) then
+    dbms_output.put_line(v_resp.status_code || ': ' || v_resp.reason_phrase);
+    return v_resp.status_code || ': ' || v_resp.reason_phrase;
+  end if;
+
+  dbms_lob.createtemporary(l_response_text, true);
+  dbms_lob.open(l_response_text, dbms_lob.lob_readwrite);
+  
+  begin
+    loop
+      utl_http.read_text(v_resp, l_chunk_vc);
+      dbms_lob.writeappend(l_response_text, length(l_chunk_vc), l_chunk_vc);
+    end loop;
+  exception
+    when utl_http.end_of_body then
+      null; -- end of body reached
+  end;
+  
+  if v_resp.private_hndl is not null then
+    utl_http.end_response(v_resp);
+  end if;
+
+  if v_req.private_hndl is not null then
+    utl_http.end_request(v_req);
+  end if;
+  
+  return ltrim(rtrim(to_char(l_response_text), '"'), '"');
+  
+exception  
+  when others then
+
+    if v_resp.private_hndl is not null then
+      utl_http.end_response(v_resp);
+    end if;
+  
+    if v_req.private_hndl is not null then
+      utl_http.end_request(v_req);
+    end if;
+    
+    raise;
+end;
