@@ -1,5 +1,3 @@
-
-sesje
 --ktora sesja blokuje ktora sesje
 with sesje as
 (
