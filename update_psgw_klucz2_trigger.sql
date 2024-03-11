@@ -17,7 +17,7 @@ create or replace trigger psgw_key2_cpt
     
       update pls_sl_grupa_wykonczen w
          set w.psgw_klucz2 =
-             (select listagg(w1.pszw_kol || '=' || w1.psw_id, ';') within group(order by w1.pszw_kol, w1.psw_id) as cc
+             (select listagg(w1.pszw_kol || '=' || w1.psw_id, ';') within group(order by to_number(substr(w1.pszw_kol, instr(w1.pszw_kol, '_') + 1)), w1.psw_id) as cc
                 from pls_sl_zwiazek_wgw w1
                where w1.psgw_id = w.psgw_id)
        where w.psgw_id = i
