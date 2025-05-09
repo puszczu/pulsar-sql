@@ -1,5 +1,5 @@
 delete from pls_produkty_paczki x
- where exists (select 1
+ where exists (/*select 1
           from pls_sl_asort_wyk aw1
          inner join pls_sl_wartech w1
             on w1.pswt_id = aw1.pswt_id
@@ -8,7 +8,17 @@ delete from pls_produkty_paczki x
          inner join pls_sl_rcp_typ t1
             on n1.psrct_id = t1.psrct_id
            and t1.psrct_kod = 'SCHP'
-         where aw1.psaw_id = x.prod_psaw_id)
+         where aw1.psaw_id = x.prod_psaw_id*/
+                                              select 1
+                                                from pls_sl_asort_wyk aw1
+                                               inner join pls_sl_asortyment a1
+                                                  on a1.psa_id = aw1.psa_id
+                                               inner join pls_sl_grupa_asort g1
+                                                  on g1.psgra_id = a1.psgra_id
+                                               inner join pls_sl_rcp_typ t1
+                                                  on t1.psrct_id = g1.box_psrct_id
+                                                 and t1.psrct_kod = 'SCHP'
+                                               where aw1.psaw_id = x.prod_psaw_id)
    and not exists
  (select 1
           from pls_sl_asort_wyk aw1
