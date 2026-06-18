@@ -1,6 +1,6 @@
-select count(1) from appl_admin.global_dml_audit3f c where c.table_name = 'GM_ZAMOWIENIA'
+select count(1), max(c.jn_datetime) from appl_admin.global_dml_audit3f c where c.table_name = 'GM_ZAMOWIENIA'
 union all
-select count(1) from appl_admin.global_dml_audit_fast c where c.table_name = 'GM_ZAMOWIENIA'
+select count(1), min(c.jn_datetime) from appl_admin.global_dml_audit_fast c where c.table_name = 'GM_ZAMOWIENIA'
 
 
   
